@@ -6,6 +6,7 @@ public class DeckOfCards
     public static readonly int SuitSize = 13;
     
     private readonly Card[] _cardReferences;
+    private int drawIndex = 0;
 
     public DeckOfCards(){
         _cardReferences = new Card[DeckSize];
@@ -28,11 +29,19 @@ public class DeckOfCards
             }
         }
     }
+    public Card[] DrawCards(int drawCount){
+        int availableCount = Mathf.Min(drawCount, DeckSize - drawIndex);//Ensure we don't overdraw cards
+        Card[] cards = new Card[availableCount];
+        for (int i = 0; i < availableCount; i++)
+            cards[i] = _cardReferences[drawIndex + i];
+        drawIndex = availableCount;
+        return cards;
+    }
     public void Print(){
         Debug.Log(ToString());
     }
     public override string ToString() { 
-        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        System.Text.StringBuilder sb = new System.Text.StringBuilder("Deck:\n");
         for (int i = 0; i < DeckSize; i++)
             sb.Append(string.Format("{0} of {1}\n", _cardReferences[i].GetFaceValue(), _cardReferences[i].GetSuit()));
         return sb.ToString();
