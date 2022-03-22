@@ -26,13 +26,16 @@ public class PlayerHand
         return _playerCards.Count;
     }
     public void Print(){
+#if UNITY_EDITOR
         Debug.Log(ToString());
+#endif
     }
-    public override string ToString()
-    {
+#if UNITY_EDITOR
+    public override string ToString(){
         System.Text.StringBuilder sb = new System.Text.StringBuilder("PlayerHand:\n");
         for (int i = 0; i < _playerCards.Count; i++)
             sb.Append(string.Format("{0} of {1}\n", _playerCards[i].GetFaceValue(), _playerCards[i].GetSuit()));
         return sb.ToString();
     }
+#endif
 }

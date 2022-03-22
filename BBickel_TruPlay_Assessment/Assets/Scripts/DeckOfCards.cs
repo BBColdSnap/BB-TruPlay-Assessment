@@ -13,7 +13,7 @@ public class DeckOfCards
         int index = 0;
         for(int suitIdx = 0; suitIdx<(int)Card.Suit.MAX; suitIdx++){
             for(int faceIdx = 0; faceIdx< SuitSize; faceIdx++, index++)
-                _cardReferences[index] = new Card((Card.Suit)suitIdx, DetermineFaceValue(faceIdx));//Card numbers start at 2
+                _cardReferences[index] = new Card((Card.Suit)suitIdx, DetermineFaceValue(faceIdx), faceIdx);
         }
     }
     public void Shuffle(){
@@ -37,18 +37,9 @@ public class DeckOfCards
         drawIndex = availableCount;
         return cards;
     }
-    public void Print(){
-        Debug.Log(ToString());
-    }
-    public override string ToString() { 
-        System.Text.StringBuilder sb = new System.Text.StringBuilder("Deck:\n");
-        for (int i = 0; i < DeckSize; i++)
-            sb.Append(string.Format("{0} of {1}\n", _cardReferences[i].GetFaceValue(), _cardReferences[i].GetSuit()));
-        return sb.ToString();
-    }
     private static string DetermineFaceValue(int faceIndex){
         if (faceIndex <= 7)
-            return (faceIndex + 2).ToString();
+            return (faceIndex + 2).ToString();//Card numbers start at 2 so offset all numbers by 2 for display
         else if (faceIndex == 8)
             return "10";
         else if (faceIndex == 9)
@@ -60,4 +51,12 @@ public class DeckOfCards
         else
             return "Ace";
     }
+#if UNITY_EDITOR
+    public override string ToString(){
+        System.Text.StringBuilder sb = new System.Text.StringBuilder("Deck:\n");
+        for (int i = 0; i < DeckSize; i++)
+            sb.Append(_cardReferences[i].ToString() + "\n");
+        return sb.ToString();
+    }
+#endif
 }
