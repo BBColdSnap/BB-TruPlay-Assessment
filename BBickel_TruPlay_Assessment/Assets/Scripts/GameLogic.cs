@@ -13,6 +13,7 @@ public class GameLogic : MonoBehaviour
     private DeckOfCards _deckOfCards;
     private PlayerHand[] _players;
     private List<Card> _turnCardPot;
+    private int _gamesCompleted = 0;
 
     private void Awake(){
         _deckOfCards = new DeckOfCards();
@@ -31,7 +32,6 @@ public class GameLogic : MonoBehaviour
             RunTurn();
             bool gameOver = CheckForGameOver();
             if (gameOver == true){
-                Start();//Endless play to test for devious shuffle
                 yield break;
             }
 
@@ -144,7 +144,7 @@ public class GameLogic : MonoBehaviour
     private bool CheckForGameOver(){
         for (int i = 0; i < PlayerCount; i++){
             if(_players[i].GetCardCount() == DeckOfCards.DeckSize){
-                Debug.LogWarning(string.Format("Player {0} Wins!", (i + 1)));
+                Debug.LogWarning(string.Format("Player {0} Wins! Games Complete: {1}", (i + 1), ++_gamesCompleted));
                 return true;
             }
         }
