@@ -17,7 +17,8 @@ public class DeckOfCards
         }
     }
     public void Shuffle(){
-        for(int i=0; i< DeckSize; i++){
+        drawIndex = 0;
+        for (int i=0; i< DeckSize; i++){
             for(int j=0; j<DeckSize; j++){
                 if (i == j)
                     continue;

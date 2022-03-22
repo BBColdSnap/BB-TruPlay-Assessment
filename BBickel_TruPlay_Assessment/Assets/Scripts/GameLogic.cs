@@ -4,8 +4,8 @@ using System.Collections.Generic;
 
 public class GameLogic : MonoBehaviour
 {
-    public static readonly int PlayerCount = 2;
-    private static readonly int WarCardTargetCount = 3;
+    private const int PlayerCount = 2;
+    private const int WarCardTargetCount = 3;
 
     [SerializeField]
     private float _turnDelay = 1f;
@@ -16,9 +16,6 @@ public class GameLogic : MonoBehaviour
 
     private void Awake(){
         _deckOfCards = new DeckOfCards();
-        _deckOfCards.Shuffle();
-        Debug.Log(_deckOfCards.ToString());
-
         _players = new PlayerHand[PlayerCount];
         for (int i = 0; i < PlayerCount; i++)
             _players[i] = new PlayerHand();
@@ -33,8 +30,10 @@ public class GameLogic : MonoBehaviour
         while(true){
             RunTurn();
             bool gameOver = CheckForGameOver();
-            if (gameOver == true)
+            if (gameOver == true){
+                Start();//Endless play to test for devious shuffle
                 yield break;
+            }
 
             float delayEnd = Time.time + _turnDelay;
             while (Time.time < delayEnd)
@@ -44,6 +43,8 @@ public class GameLogic : MonoBehaviour
     private void DealCards(){
         for (int i = 0; i < PlayerCount; i++)
             _players[i].ClearAllCards();
+
+        _deckOfCards.Shuffle();
 
         int minHandSize = DeckOfCards.DeckSize / PlayerCount;
         int remainder = DeckOfCards.DeckSize % PlayerCount;
@@ -80,7 +81,7 @@ public class GameLogic : MonoBehaviour
             else if (maxCardValue == playerCard.GetCompareValue())
             {
                 triggerWar = true;
-                warPlayer = i;
+                warPlayer = i;//TODO: Expand logic to factor in several players
             }
         }
 
@@ -96,30 +97,16 @@ public class GameLogic : MonoBehaviour
     private void RunWar(int warPlayer1, int warPlayer2){
         Debug.Log("WAR!");
 
-        /*
-           * If one player has at least 4 cards (3 for war, 1 to compare), and the other has less, first player wins
-           * If both players do not have enough (only counts in 3+ player games), player with more cards wins
-           * Otherwise, proceed
-       */
-        bool playerWillAutoWin = true;
-        int winningPlayer = -1;
-        for (int i = 0; i < PlayerCount; i++){
-            if (winningPlayer == -1 && _players[i].GetCardCount() >= WarCardTargetCount + 1){
-                winningPlayer = i;
-            }
-            else if (_players[i].GetCardCount() >= WarCardTargetCount + 1){
-                winningPlayer = -1;
-                playerWillAutoWin = false;//Multiple players have enough cards, proceed as normal
-            }
-        }
+        int playerAutoWinIndex = -1;
+        bool playerWillAutoWin = CheckForIncompleteWar(warPlayer1, warPlayer2, ref playerAutoWinIndex);
+        if (playerWillAutoWin == true){
 
-        if(playerWillAutoWin == true){
-            int otherPlayer = (winningPlayer == warPlayer1) ? warPlayer1 : warPlayer2;
-            while (_players[otherPlayer].GetCardCount() > 0)
-                _turnCardPot.Add(_players[otherPlayer].DrawTopCard());
-            _players[winningPlayer].AddCardsToBottom(_turnCardPot.ToArray());
+            int losingPlayerIndex = (playerAutoWinIndex == warPlayer1) ? warPlayer2 : warPlayer1;
+            while (_players[losingPlayerIndex].GetCardCount() > 0)
+                _turnCardPot.Add(_players[losingPlayerIndex].DrawTopCard());
+            _players[playerAutoWinIndex].AddCardsToBottom(_turnCardPot.ToArray());
             _turnCardPot.Clear();
-            Debug.Log("Player " + winningPlayer + " takes pot War (early)- " + _players[winningPlayer].GetCardCount());
+            Debug.Log("Player " + playerAutoWinIndex + " takes pot War (early)- " + _players[playerAutoWinIndex].GetCardCount());
             return;
         }
 
@@ -132,10 +119,32 @@ public class GameLogic : MonoBehaviour
         
         RunTurn();
     }
+    private bool CheckForIncompleteWar(int warPlayer1, int warPlayer2, ref int winningPlayerIndex)
+    {
+        /*
+          * If one player has at least 4 cards (3 for war, 1 to compare), and the other has less, first player wins
+          * If both players do not have enough (only counts in 3+ player games), player with more cards wins
+          * Otherwise, proceed
+        */
+        int player1CardCount = _players[warPlayer1].GetCardCount();
+        int player2CardCount = _players[warPlayer2].GetCardCount();
+        const int minCardCount = WarCardTargetCount + 1;
+        if(player1CardCount < minCardCount && player2CardCount > player1CardCount){
+            winningPlayerIndex = warPlayer2;
+            return true;
+        }
+        else if(player1CardCount > player2CardCount && player2CardCount < minCardCount){
+            winningPlayerIndex = warPlayer1;
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
     private bool CheckForGameOver(){
         for (int i = 0; i < PlayerCount; i++){
             if(_players[i].GetCardCount() == DeckOfCards.DeckSize){
-                Debug.Log(string.Format("Player {0} Wins!", (i + 1)));
+                Debug.LogWarning(string.Format("Player {0} Wins!", (i + 1)));
                 return true;
             }
         }
