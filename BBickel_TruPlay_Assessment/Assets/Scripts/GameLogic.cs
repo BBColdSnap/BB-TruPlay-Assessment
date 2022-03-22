@@ -2,19 +2,24 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public class GameLogic : MonoBehaviour
-{
-    private const int PlayerCount = 2;
-    private const int WarCardTargetCount = 3;
+/// <summary>
+/// GameLogic - Core class for turn ordering and player instantiation and management
+/// </summary>
+public class GameLogic : MonoBehaviour{
+    private const int PlayerCount = 2;              //How many players are in this game
+    private const int WarCardTargetCount = 3;       //How many cards are used in a "War" pile
 
     [SerializeField]
-    private float _turnDelay = 1f;
+    private float _turnDelay = 1f;                  //How long each turn will wait before automatically proceeding
 
-    private DeckOfCards _deckOfCards;
-    private PlayerHand[] _players;
-    private List<Card> _turnCardPot;
-    private int _gamesCompleted = 0;
+    private DeckOfCards _deckOfCards;               //Reference to this game's Card deck
+    private PlayerHand[] _players;                  //Array of players in this game (size 'PlayerCount')
+    private List<Card> _turnCardPot;                //List of Card references that holds the pot for each turn
+    private int _gamesCompleted = 0;                //Internal tracker for how many games are finished during a session.
 
+    /// <summary>
+    /// Initial reference creations
+    /// </summary>
     private void Awake(){
         _deckOfCards = new DeckOfCards();
         _players = new PlayerHand[PlayerCount];
@@ -22,10 +27,17 @@ public class GameLogic : MonoBehaviour
             _players[i] = new PlayerHand();
         _turnCardPot = new List<Card>();
     }
+    /// <summary>
+    /// Gameplay setup
+    /// </summary>
     private void Start(){
         DealCards();
         StartCoroutine(RunTurnsOnDelay());
     }
+    /// <summary>
+    /// Automate turns for now, no user action required
+    /// </summary>
+    /// <returns>IEnumerator. Use StartCoroutine</returns>
     private IEnumerator RunTurnsOnDelay(){
         
         while(true){
@@ -40,6 +52,9 @@ public class GameLogic : MonoBehaviour
                 yield return null;
         }
     }
+    /// <summary>
+    /// Deal out the entire deck of cards among all players
+    /// </summary>
     private void DealCards(){
         for (int i = 0; i < PlayerCount; i++)
             _players[i].ClearAllCards();
@@ -51,7 +66,7 @@ public class GameLogic : MonoBehaviour
 
         for(int i=0; i<PlayerCount; i++){
             int playerHandSize = minHandSize;
-            if (remainder > 0){//If we have extra cards, spread them out between players
+            if (remainder > 0){                     //If we have extra cards, spread them out
                 playerHandSize++;
                 remainder--;
             }
@@ -60,8 +75,10 @@ public class GameLogic : MonoBehaviour
             _players[i].Print();
         }
     }
+    /// <summary>
+    /// Run a single turn. Compare cards, and go to War if applicable.
+    /// </summary>
     private void RunTurn(){
-
         int maxCardValue = int.MinValue;
         int maxCardPlayer = -1;
         int warPlayer = -1;
@@ -73,15 +90,13 @@ public class GameLogic : MonoBehaviour
 
             Debug.Log(string.Format("Player {0} plays {1}", i, playerCard.ToString()));
 
-            if (maxCardValue < playerCard.GetCompareValue())
-            {
+            if (maxCardValue < playerCard.GetCompareValue()){
                 maxCardValue = playerCard.GetCompareValue();
                 maxCardPlayer = i;
             }
-            else if (maxCardValue == playerCard.GetCompareValue())
-            {
+            else if (maxCardValue == playerCard.GetCompareValue()){
                 triggerWar = true;
-                warPlayer = i;//TODO: Expand logic to factor in several players
+                warPlayer = i;                      //TODO: Expand logic to factor in several players
             }
         }
 
@@ -94,9 +109,14 @@ public class GameLogic : MonoBehaviour
             RunWar(maxCardPlayer, warPlayer);
         }
     }
+    /// <summary>
+    /// Run the "War" logic, deal out 3 cards then return to Turn to compare last card. 
+    /// Handles lose-case if player does not have enough cards to fight.
+    /// </summary>
+    /// <param name="warPlayer1">Index of player entering War (1 of 2)</param>
+    /// <param name="warPlayer2">Index of player entering War (2 of 2)</param>
     private void RunWar(int warPlayer1, int warPlayer2){
         Debug.Log("WAR!");
-
         int playerAutoWinIndex = -1;
         bool playerWillAutoWin = CheckForIncompleteWar(warPlayer1, warPlayer2, ref playerAutoWinIndex);
         if (playerWillAutoWin == true){
@@ -119,13 +139,14 @@ public class GameLogic : MonoBehaviour
         
         RunTurn();
     }
-    private bool CheckForIncompleteWar(int warPlayer1, int warPlayer2, ref int winningPlayerIndex)
-    {
-        /*
-          * If one player has at least 4 cards (3 for war, 1 to compare), and the other has less, first player wins
-          * If both players do not have enough (only counts in 3+ player games), player with more cards wins
-          * Otherwise, proceed
-        */
+    /// <summary>
+    /// Helper function used to check if a player will automatically lose if going to war due to insufficient card count (Needs 3 for the war, and 1 to compare).
+    /// </summary>
+    /// <param name="warPlayer1">Index of player entering War (1 of 2)</param>
+    /// <param name="warPlayer2">Index of player entering War (2 of 2)</param>
+    /// <param name="winningPlayerIndex">Reference parameter, filled in with index of winning player if applicable.</param>
+    /// <returns>True, if War is auto-won. False if War will proceed as normal.</returns>
+    private bool CheckForIncompleteWar(int warPlayer1, int warPlayer2, ref int winningPlayerIndex){
         int player1CardCount = _players[warPlayer1].GetCardCount();
         int player2CardCount = _players[warPlayer2].GetCardCount();
         const int minCardCount = WarCardTargetCount + 1;
@@ -141,6 +162,10 @@ public class GameLogic : MonoBehaviour
             return false;
         }
     }
+    /// <summary>
+    /// Checks if any player has collected all the cards.
+    /// </summary>
+    /// <returns>True if a player has all the cards.</returns>
     private bool CheckForGameOver(){
         for (int i = 0; i < PlayerCount; i++){
             if(_players[i].GetCardCount() == DeckOfCards.DeckSize){

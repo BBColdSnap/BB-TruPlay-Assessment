@@ -1,7 +1,6 @@
 using UnityEngine;
 
-public class MainMenu : MonoBehaviour
-{
+public class MainMenu : MonoBehaviour{
     public string GameSceneName;
 
     public void PlayButton(){
