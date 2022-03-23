@@ -9,13 +9,16 @@ public class GameLogic : MonoBehaviour{
     private const int PlayerCount = 2;              //How many players are in this game
     private const int WarCardTargetCount = 3;       //How many cards are used in a "War" pile
 
+    //[SerializeField]
+    //private float _turnDelay = 1f;                  //How long each turn will wait before automatically proceeding
     [SerializeField]
-    private float _turnDelay = 1f;                  //How long each turn will wait before automatically proceeding
+    private GameTable _gameTableReference;          //Reference to scene's game table for card visuals
 
     private DeckOfCards _deckOfCards;               //Reference to this game's Card deck
     private PlayerHand[] _players;                  //Array of players in this game (size 'PlayerCount')
     private List<Card> _turnCardPot;                //List of Card references that holds the pot for each turn
     private int _gamesCompleted = 0;                //Internal tracker for how many games are finished during a session.
+    private bool _runningGameAnimations = false;
 
     /// <summary>
     /// Initial reference creations
@@ -31,6 +34,8 @@ public class GameLogic : MonoBehaviour{
     /// Gameplay setup
     /// </summary>
     private void Start(){
+        
+        _gameTableReference.SetPlayerReferences(_players);
         DealCards();
         StartCoroutine(RunTurnsOnDelay());
     }
@@ -39,16 +44,16 @@ public class GameLogic : MonoBehaviour{
     /// </summary>
     /// <returns>IEnumerator. Use StartCoroutine</returns>
     private IEnumerator RunTurnsOnDelay(){
-        
-        while(true){
+
+        while (true){
             RunTurn();
             bool gameOver = CheckForGameOver();
             if (gameOver == true){
                 yield break;
             }
 
-            float delayEnd = Time.time + _turnDelay;
-            while (Time.time < delayEnd)
+            //float delayEnd = Time.time + _turnDelay;
+            while (_runningGameAnimations == true)
                 yield return null;
         }
     }
@@ -96,17 +101,36 @@ public class GameLogic : MonoBehaviour{
             }
             else if (maxCardValue == playerCard.GetCompareValue()){
                 triggerWar = true;
-                warPlayer = i;                      //TODO: Expand logic to factor in several players
+                warPlayer = i;
             }
         }
 
         if(triggerWar == false){
-            _players[maxCardPlayer].AddCardsToBottom(_turnCardPot.ToArray());
-            _turnCardPot.Clear();
-            Debug.Log("Player " + maxCardPlayer + " takes pot - "+ _players[maxCardPlayer].GetCardCount());
+            _runningGameAnimations = true;
+            int lastIndex = _turnCardPot.Count - 1;
+            StartCoroutine(_gameTableReference.ShowPlayerCards(_turnCardPot[lastIndex-1], _turnCardPot[lastIndex], maxCardPlayer, () => {
+                _runningGameAnimations = false;
+                _players[maxCardPlayer].AddCardsToBottom(_turnCardPot.ToArray());
+                _turnCardPot.Clear();
+                Debug.Log("Player " + maxCardPlayer + " takes pot - " + _players[maxCardPlayer].GetCardCount());
+            }));
         }
         else{
-            RunWar(maxCardPlayer, warPlayer);
+            _runningGameAnimations = true;
+            int lastIndex = _turnCardPot.Count - 1;
+            StartCoroutine(_gameTableReference.ShowPlayerCards(_turnCardPot[lastIndex], _turnCardPot[lastIndex - 1], -1, () => {
+                int player1WarCards = Mathf.Min(WarCardTargetCount, _players[0].GetCardCount());
+                int player2WarCards = Mathf.Min(WarCardTargetCount, _players[1].GetCardCount());
+
+                RunWar(maxCardPlayer, warPlayer);
+
+                StartCoroutine(_gameTableReference.ShowPlayerWar(player1WarCards, player2WarCards, () => {
+                    _runningGameAnimations = false;
+
+                    if(_players[0].GetCardCount() > 0 && _players[1].GetCardCount() > 0)
+                        RunTurn();
+                }));
+            }));
         }
     }
     /// <summary>
@@ -136,8 +160,6 @@ public class GameLogic : MonoBehaviour{
                 _turnCardPot.Add(playerCard);
             }
         }
-        
-        RunTurn();
     }
     /// <summary>
     /// Helper function used to check if a player will automatically lose if going to war due to insufficient card count (Needs 3 for the war, and 1 to compare).
