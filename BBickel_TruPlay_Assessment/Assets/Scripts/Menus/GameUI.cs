@@ -6,6 +6,12 @@ using TMPro;
 /// </summary>
 public class GameUI : MonoBehaviour
 {
+    //Public Types
+    public delegate void GameUIEvent();                 //Public type to create callbacks
+
+    //Publicly Accessed Members
+    public GameUIEvent PlayButtonPressed;               //Subscribable Event for when we
+
     //Inspector Fields
     [SerializeField]
     private string _menuSceneName;                      //Scene to load for sameplay
@@ -17,12 +23,33 @@ public class GameUI : MonoBehaviour
     private TextMeshProUGUI _player2CardCountLabel;     //Scene to load for sameplay
     [SerializeField]
     private TextMeshProUGUI _player2WonCountLabel;      //Scene to load for sameplay
+    [SerializeField]
+    private GameObject _playButtonObject;               //UI Play Button. Shows and hides contextually.
 
+    /// <summary>
+    /// Set up default menu state.
+    /// </summary>
+    private void Start() {
+        _playButtonObject.SetActive(false);
+    }
     /// <summary>
     /// BackButton callback connected to prefab. Loads the _menuSceneName Scene
     /// </summary>
     public void BackButton() {
         UnityEngine.SceneManagement.SceneManager.LoadScene(_menuSceneName, UnityEngine.SceneManagement.LoadSceneMode.Single);
+    }
+    /// <summary>
+    /// PlayButton callback connected to prefab. Calls the PlayButtonPressed event;
+    /// </summary>
+    public void PlayButton() {
+        PlayButtonPressed?.Invoke();
+        _playButtonObject.SetActive(false);
+    }
+    /// <summary>
+    /// Public method to indicate a game as completed
+    /// </summary>
+    public void GameOver() {
+        _playButtonObject.SetActive(true);
     }
     /// <summary>
     /// Public method to update the card count labels for both players.

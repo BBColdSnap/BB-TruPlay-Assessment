@@ -42,12 +42,16 @@ public class GameTable : MonoBehaviour{
     //Private Members
     private PlayerHand[] _players;                      //References to game's players. Used to read card counts remaining.
 
-    private GameObject _player1DrawObj;                 //Instantiated object of Player 1's draw pile
-    private GameObject _player1WonObj;                  //Instantiated object of Player 1's won pile
+    private GameObject _player1DrawObj_Large;           //Instantiated object of Player 1's draw pile (Large)
+    private GameObject _player1DrawObj_Small;           //Instantiated object of Player 1's draw pile (Small)
+    private GameObject _player1WonObj_Large;            //Instantiated object of Player 1's won pile (Large)
+    private GameObject _player1WonObj_Small;            //Instantiated object of Player 1's won pile (Small
     private SceneCard _player1CardObj;                  //Instantiated object of Player 1's active card (reused for all play)
 
-    private GameObject _player2DrawObj;                 //Instantiated object of Player 2's draw pile
-    private GameObject _player2WonObj;                  //Instantiated object of Player 2's won pile
+    private GameObject _player2DrawObj_Large;           //Instantiated object of Player 2's draw pile (Large)
+    private GameObject _player2DrawObj_Small;           //Instantiated object of Player 2's draw pile (Small)
+    private GameObject _player2WonObj_Large;            //Instantiated object of Player 2's won pile (Large)
+    private GameObject _player2WonObj_Small;            //Instantiated object of Player 2's won pile (Small)
     private SceneCard _player2CardObj;                  //Instantiated object of Player 2's active card (reused for all play)
 
     /// <summary>
@@ -58,17 +62,29 @@ public class GameTable : MonoBehaviour{
         _players = players;
 
         //Player 1
-        _player1DrawObj = Instantiate(_largeDeckPrefab);
-        _player1DrawObj.transform.SetParent(_player1_DrawPile.transform);
-        _player1DrawObj.transform.localPosition = Vector3.zero;
-        _player1DrawObj.transform.localRotation = Quaternion.identity;
-        _player1DrawObj.transform.localScale = Vector3.one;
+        _player1DrawObj_Large = Instantiate(_largeDeckPrefab);
+        _player1DrawObj_Large.transform.SetParent(_player1_DrawPile.transform);
+        _player1DrawObj_Large.transform.localPosition = Vector3.zero;
+        _player1DrawObj_Large.transform.localRotation = Quaternion.identity;
+        _player1DrawObj_Large.transform.localScale = Vector3.one;
 
-        _player1WonObj = Instantiate(_largeDiscardPrefab);
-        _player1WonObj.transform.SetParent(_player1_WonPile.transform);
-        _player1WonObj.transform.localPosition = Vector3.zero;
-        _player1WonObj.transform.localRotation = Quaternion.identity;
-        _player1WonObj.transform.localScale = Vector3.one;
+        _player1DrawObj_Small = Instantiate(_smallDeckPrefab);
+        _player1DrawObj_Small.transform.SetParent(_player1_DrawPile.transform);
+        _player1DrawObj_Small.transform.localPosition = Vector3.zero;
+        _player1DrawObj_Small.transform.localRotation = Quaternion.identity;
+        _player1DrawObj_Small.transform.localScale = Vector3.one;
+
+        _player1WonObj_Large = Instantiate(_largeDiscardPrefab);
+        _player1WonObj_Large.transform.SetParent(_player1_WonPile.transform);
+        _player1WonObj_Large.transform.localPosition = Vector3.zero;
+        _player1WonObj_Large.transform.localRotation = Quaternion.identity;
+        _player1WonObj_Large.transform.localScale = Vector3.one;
+
+        _player1WonObj_Small = Instantiate(_smallDiscardPrefab);
+        _player1WonObj_Small.transform.SetParent(_player1_WonPile.transform);
+        _player1WonObj_Small.transform.localPosition = Vector3.zero;
+        _player1WonObj_Small.transform.localRotation = Quaternion.identity;
+        _player1WonObj_Small.transform.localScale = Vector3.one;
 
         GameObject player1SuitCardObj = Instantiate(_cardPrefab);
         player1SuitCardObj.transform.SetParent(_player1_TurnCard.transform);
@@ -79,17 +95,29 @@ public class GameTable : MonoBehaviour{
         _player1CardObj = player1SuitCardObj.GetComponent<SceneCard>();
 
         //Player 2
-        _player2DrawObj = Instantiate(_largeDeckPrefab);
-        _player2DrawObj.transform.SetParent(_player2_DrawPile.transform);
-        _player2DrawObj.transform.localPosition = Vector3.zero;
-        _player2DrawObj.transform.localRotation = Quaternion.identity;
-        _player2DrawObj.transform.localScale = Vector3.one;
-               
-        _player2WonObj = Instantiate(_largeDiscardPrefab);
-        _player2WonObj.transform.SetParent(_player2_WonPile.transform);
-        _player2WonObj.transform.localPosition = Vector3.zero;
-        _player2WonObj.transform.localRotation = Quaternion.identity;
-        _player2WonObj.transform.localScale = Vector3.one;
+        _player2DrawObj_Large = Instantiate(_largeDeckPrefab);
+        _player2DrawObj_Large.transform.SetParent(_player2_DrawPile.transform);
+        _player2DrawObj_Large.transform.localPosition = Vector3.zero;
+        _player2DrawObj_Large.transform.localRotation = Quaternion.identity;
+        _player2DrawObj_Large.transform.localScale = Vector3.one;
+
+        _player2DrawObj_Small = Instantiate(_smallDeckPrefab);
+        _player2DrawObj_Small.transform.SetParent(_player2_DrawPile.transform);
+        _player2DrawObj_Small.transform.localPosition = Vector3.zero;
+        _player2DrawObj_Small.transform.localRotation = Quaternion.identity;
+        _player2DrawObj_Small.transform.localScale = Vector3.one;
+
+        _player2WonObj_Large = Instantiate(_largeDiscardPrefab);
+        _player2WonObj_Large.transform.SetParent(_player2_WonPile.transform);
+        _player2WonObj_Large.transform.localPosition = Vector3.zero;
+        _player2WonObj_Large.transform.localRotation = Quaternion.identity;
+        _player2WonObj_Large.transform.localScale = Vector3.one;
+
+        _player2WonObj_Small = Instantiate(_smallDiscardPrefab);
+        _player2WonObj_Small.transform.SetParent(_player2_WonPile.transform);
+        _player2WonObj_Small.transform.localPosition = Vector3.zero;
+        _player2WonObj_Small.transform.localRotation = Quaternion.identity;
+        _player2WonObj_Small.transform.localScale = Vector3.one;
 
         GameObject player2SuitCardObj = Instantiate(_cardPrefab);
         player2SuitCardObj.transform.SetParent(_player2_TurnCard.transform);
@@ -103,9 +131,23 @@ public class GameTable : MonoBehaviour{
     /// Updates the state of the player objects to reflect current card counts.
     /// </summary>
     public void UpdateCardVisuals(){
-        //Check player draw piles and won piles sizes
+        //Draw Piles
+        int player1DrawCardCount = _players[0].GetDrawPileCount();
+        int player2DrawCardCount = _players[1].GetDrawPileCount();
+        _player1DrawObj_Large.SetActive(player1DrawCardCount > _playerSmallPileThreshold);
+        _player1DrawObj_Small.SetActive(player1DrawCardCount > 0 && player1DrawCardCount <= _playerSmallPileThreshold);
 
-        //Update Text displays
+        _player2DrawObj_Large.SetActive(player2DrawCardCount > _playerSmallPileThreshold);
+        _player2DrawObj_Small.SetActive(player2DrawCardCount > 0 && player2DrawCardCount <= _playerSmallPileThreshold);
+
+        //Won Piles
+        int player1WonCardCount = _players[0].GetWonPileCount();
+        int player2WonCardCount = _players[1].GetWonPileCount();
+        _player1WonObj_Large.SetActive(player1WonCardCount > _playerSmallPileThreshold);
+        _player1WonObj_Small.SetActive(player1WonCardCount > 0 && player1WonCardCount <= _playerSmallPileThreshold);
+
+        _player2WonObj_Large.SetActive(player2WonCardCount > _playerSmallPileThreshold);
+        _player2WonObj_Small.SetActive(player2WonCardCount > 0 && player2WonCardCount <= _playerSmallPileThreshold);
     }
     /// <summary>
     /// Lerps player cards from respective Draw piles to center of table, then lerps to player's pot for player 'winnerIndex'
@@ -146,7 +188,7 @@ public class GameTable : MonoBehaviour{
 
         if(winnerIndex != -1){//Only lerp to a pile if there's not a War
             //Lerp cards to winner's pile
-            Transform winnerTransform = (winnerIndex == 0) ? _player1WonObj.transform : _player2WonObj.transform;
+            Transform winnerTransform = (winnerIndex == 0) ? _player1WonObj_Large.transform : _player2WonObj_Large.transform;
             cardLerpsComplete = 0;
             StartCoroutine(LerpCardObjectToTransform(_player1CardObj.transform, winnerTransform, () => {
                 _player1CardObj.gameObject.SetActive(false);
