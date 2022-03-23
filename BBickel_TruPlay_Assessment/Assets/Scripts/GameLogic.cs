@@ -6,13 +6,18 @@ using System.Collections.Generic;
 /// GameLogic - Core class for turn ordering and player instantiation and management
 /// </summary>
 public class GameLogic : MonoBehaviour{
-    
+
+    // Constant Members
     private const int PlayerCount = 2;                  //How many players are in this game
     private const int WarCardTargetCount = 3;           //How many cards are used in a "War" pile
 
+    //Inspector Fields
     [SerializeField]
     private GameTable _gameTableReference;              //Reference to scene's game table for card visuals
+    [SerializeField]
+    private GameUI _gameUIReference;                    //Reference to scene's UI for card counts
 
+    //Private Members
     private DeckOfCards _deckOfCards;                   //Reference to this game's Card deck
     private PlayerHand[] _players;                      //Array of players in this game (size 'PlayerCount')
     private List<Card> _turnCardPot;                    //List of Card references that holds the pot for each turn
@@ -33,7 +38,6 @@ public class GameLogic : MonoBehaviour{
     /// Gameplay setup
     /// </summary>
     private void Start(){
-        
         _gameTableReference.SetPlayerReferences(_players);
         DealCards();
         StartCoroutine(RunTurnsOnDelay());
@@ -43,7 +47,6 @@ public class GameLogic : MonoBehaviour{
     /// </summary>
     /// <returns>IEnumerator. Use StartCoroutine</returns>
     private IEnumerator RunTurnsOnDelay(){
-
         while (true){
             RunTurn();
             bool gameOver = CheckForGameOver();
@@ -70,7 +73,7 @@ public class GameLogic : MonoBehaviour{
 
         for(int i=0; i<PlayerCount; i++){
             int playerHandSize = minHandSize;
-            if (remainder > 0){                     //If we have extra cards, spread them out
+            if (remainder > 0){                         //If we have extra cards, spread them out
                 playerHandSize++;
                 remainder--;
             }
@@ -78,6 +81,7 @@ public class GameLogic : MonoBehaviour{
             _players[i].AddCardsToBottom(_deckOfCards.DrawCards(playerHandSize));
             _players[i].Print();
         }
+        _gameUIReference.UpdatePlayerLabels(_players[0], _players[1]);
     }
     /// <summary>
     /// Run a single turn. Compare cards, and go to War if applicable.
@@ -107,27 +111,32 @@ public class GameLogic : MonoBehaviour{
         if(triggerWar == false){
             _runningGameAnimations = true;
             int lastIndex = _turnCardPot.Count - 1;
+            _gameUIReference.UpdatePlayerLabels(_players[0], _players[1]);
             StartCoroutine(_gameTableReference.ShowPlayerCards(_turnCardPot[lastIndex-1], _turnCardPot[lastIndex], maxCardPlayer, () => {
                 _runningGameAnimations = false;
                 _players[maxCardPlayer].AddCardsToBottom(_turnCardPot.ToArray());
                 _turnCardPot.Clear();
-                Debug.Log("Player " + maxCardPlayer + " takes pot - " + _players[maxCardPlayer].GetCardCount());
+                _gameUIReference.UpdatePlayerLabels(_players[0], _players[1]);
+                Debug.Log("Player " + maxCardPlayer + " takes pot - " + _players[maxCardPlayer].GetTotalCardCount());
             }));
         }
         else{
             _runningGameAnimations = true;
             int lastIndex = _turnCardPot.Count - 1;
+            _gameUIReference.UpdatePlayerLabels(_players[0], _players[1]);
             StartCoroutine(_gameTableReference.ShowPlayerCards(_turnCardPot[lastIndex], _turnCardPot[lastIndex - 1], -1, () => {
-                int player1WarCards = Mathf.Min(WarCardTargetCount, _players[0].GetCardCount());
-                int player2WarCards = Mathf.Min(WarCardTargetCount, _players[1].GetCardCount());
+                int player1WarCards = Mathf.Min(WarCardTargetCount, _players[0].GetTotalCardCount());
+                int player2WarCards = Mathf.Min(WarCardTargetCount, _players[1].GetTotalCardCount());
 
                 RunWar(maxCardPlayer, warPlayer);
 
+                _gameUIReference.UpdatePlayerLabels(_players[0], _players[1]);
                 StartCoroutine(_gameTableReference.ShowPlayerWar(player1WarCards, player2WarCards, () => {
                     _runningGameAnimations = false;
 
-                    if(_players[0].GetCardCount() > 0 && _players[1].GetCardCount() > 0)
+                    if(_players[0].GetTotalCardCount() > 0 && _players[1].GetTotalCardCount() > 0)
                         RunTurn();
+                    _gameUIReference.UpdatePlayerLabels(_players[0], _players[1]);
                 }));
             }));
         }
@@ -145,11 +154,11 @@ public class GameLogic : MonoBehaviour{
         if (playerWillAutoWin == true){
 
             int losingPlayerIndex = (playerAutoWinIndex == warPlayer1) ? warPlayer2 : warPlayer1;
-            while (_players[losingPlayerIndex].GetCardCount() > 0)
+            while (_players[losingPlayerIndex].GetTotalCardCount() > 0)
                 _turnCardPot.Add(_players[losingPlayerIndex].DrawTopCard());
             _players[playerAutoWinIndex].AddCardsToBottom(_turnCardPot.ToArray());
             _turnCardPot.Clear();
-            Debug.Log("Player " + playerAutoWinIndex + " takes pot War (early)- " + _players[playerAutoWinIndex].GetCardCount());
+            Debug.Log("Player " + playerAutoWinIndex + " takes pot War (early)- " + _players[playerAutoWinIndex].GetTotalCardCount());
             return;
         }
 
@@ -168,8 +177,8 @@ public class GameLogic : MonoBehaviour{
     /// <param name="winningPlayerIndex">Reference parameter, filled in with index of winning player if applicable.</param>
     /// <returns>True, if War is auto-won. False if War will proceed as normal.</returns>
     private bool CheckForIncompleteWar(int warPlayer1, int warPlayer2, ref int winningPlayerIndex){
-        int player1CardCount = _players[warPlayer1].GetCardCount();
-        int player2CardCount = _players[warPlayer2].GetCardCount();
+        int player1CardCount = _players[warPlayer1].GetTotalCardCount();
+        int player2CardCount = _players[warPlayer2].GetTotalCardCount();
         const int minCardCount = WarCardTargetCount + 1;
         if(player1CardCount < minCardCount && player2CardCount > player1CardCount){
             winningPlayerIndex = warPlayer2;
@@ -189,7 +198,7 @@ public class GameLogic : MonoBehaviour{
     /// <returns>True if a player has all the cards.</returns>
     private bool CheckForGameOver(){
         for (int i = 0; i < PlayerCount; i++){
-            if(_players[i].GetCardCount() == DeckOfCards.DeckSize){
+            if(_players[i].GetTotalCardCount() == DeckOfCards.DeckSize){
                 Debug.LogWarning(string.Format("Player {0} Wins! Games Complete: {1}", (i + 1), ++_gamesCompleted));
                 return true;
             }

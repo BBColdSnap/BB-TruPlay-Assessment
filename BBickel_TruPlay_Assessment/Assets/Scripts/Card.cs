@@ -7,6 +7,7 @@ public class Card{
     public enum Suit { SPADE=0, HEART, CLUB, DIAMOND, 
         MAX}                                            //Enum for available Card suits
 
+    // Constant Members
     private readonly Suit _suit;                        //The suit of this card
     private readonly string _displayValue;              //The face value of this card (text)
     private readonly int _compareValue;                 //The value this card holds when comparing against others

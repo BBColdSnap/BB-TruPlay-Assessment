@@ -5,7 +5,8 @@ using System.Collections.Generic;
 /// PlayerHand - Reference of a player. Manage's the player's card pile(s).
 /// </summary>
 public class PlayerHand{
-    
+
+    //Private Members
     private List<Card> _playerCards;                    //Cards the player can draw from
     private List<Card> _playerWonCards;                 //Cards the player has won (will move to _playerCards if empty)
     
@@ -51,8 +52,22 @@ public class PlayerHand{
     /// Get total number of player's remaining cards.
     /// </summary>
     /// <returns>Player's total remaining cards.</returns>
-    public int GetCardCount(){
+    public int GetTotalCardCount(){
         return _playerCards.Count + _playerWonCards.Count;
+    }
+    /// <summary>
+    /// Get number of cards present in the player's 'draw' pile
+    /// </summary>
+    /// <returns></returns>
+    public int GetDrawPileCount() {
+        return _playerCards.Count;
+    }
+    /// <summary>
+    /// Get number of cards present in the player's 'won' pile
+    /// </summary>
+    /// <returns></returns>
+    public int GetWonPileCount() {
+        return _playerWonCards.Count;
     }
     /// <summary>
     /// (Editor Only) Print the user's card stack to the console
