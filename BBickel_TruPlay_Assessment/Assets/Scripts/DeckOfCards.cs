@@ -4,6 +4,7 @@ using UnityEngine;
 /// DeckOfCards - Reference class for a deck of 52 unique cards (one of each suit+value). Handles shuffling and drawing.
 /// </summary>
 public class DeckOfCards{
+    
     public static readonly int DeckSize = 52;           //How many total cards are in a deck
     public static readonly int SuitSize = 13;           //How many cards are in each suit
     

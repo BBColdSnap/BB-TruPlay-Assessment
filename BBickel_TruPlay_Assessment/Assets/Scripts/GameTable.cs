@@ -2,49 +2,59 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class GameTable : MonoBehaviour
-{
-    private const int playerSmallPileThreshold = 10;
+/// <summary>
+/// GameTable - Graphical components of War game, referenced on Table prefab
+/// </summary>
+public class GameTable : MonoBehaviour{
+    
+    // Constant Members
+    private const int _playerSmallPileThreshold = 10;   //Threshold of cards to determine 'large' versus 'small' deck or won piles
 
+    //Inspector Fields
     [SerializeField]
-    private GameObject _player1_DrawPile;
+    private GameObject _player1_DrawPile;               //Scene reference of Player 1's draw pile position transform
     [SerializeField]   
-    private GameObject _player1_WonPile;
+    private GameObject _player1_WonPile;                //Scene reference of Player 1's won pile position transform
     [SerializeField]   
-    private GameObject _player1_TurnCard;
+    private GameObject _player1_TurnCard;               //Scene reference of Player 1's played card end position transform
+
+    [SerializeField]   
+    private GameObject _player2_DrawPile;               //Scene reference of Player 2's draw pile position transform
+    [SerializeField]   
+    private GameObject _player2_WonPile;                //Scene reference of Player 2's won pile position transform
+    [SerializeField]   
+    private GameObject _player2_TurnCard;               //Scene reference of Player 2's played card end position transform
                        
     [SerializeField]   
-    private GameObject _player2_DrawPile;
+    private GameObject _largeDeckPrefab;                //Prefab refernce of Large player draw deck
     [SerializeField]   
-    private GameObject _player2_WonPile;
+    private GameObject _smallDeckPrefab;                //Prefab reference of Small player draw deck
     [SerializeField]   
-    private GameObject _player2_TurnCard;
-                       
+    private GameObject _largeDiscardPrefab;             //Prefab reference of Large player won pile
     [SerializeField]   
-    private GameObject _largeDeckPrefab;
+    private GameObject _smallDiscardPrefab;             //Prefab reference of Small player won pile
     [SerializeField]   
-    private GameObject _smallDeckPrefab;
-    [SerializeField]   
-    private GameObject _largeDiscardPrefab;
-    [SerializeField]   
-    private GameObject _smallDiscardPrefab;
-    [SerializeField]   
-    private GameObject _cardPrefab;
+    private GameObject _cardPrefab;                     //Prefab reference of generic card object to use as cards are played
 
     [SerializeField]
-    private float _cardPlayLerpTime = 0.5f;
+    private float _cardPlayLerpTime = 0.5f;             //Duration for each card to lerp from Draw pile to the end play position
 
-    private PlayerHand[] _players;
-    private GameObject _player1DrawObj;
-    private GameObject _player1WonObj;
-    private SceneCard _player1CardObj;
+    //Private Members
+    private PlayerHand[] _players;                      //References to game's players. Used to read card counts remaining.
 
-    private GameObject _player2DrawObj;
-    private GameObject _player2WonObj;
-    private SceneCard _player2CardObj;
+    private GameObject _player1DrawObj;                 //Instantiated object of Player 1's draw pile
+    private GameObject _player1WonObj;                  //Instantiated object of Player 1's won pile
+    private SceneCard _player1CardObj;                  //Instantiated object of Player 1's active card (reused for all play)
 
-    public void SetPlayerReferences(PlayerHand[] players)
-    {
+    private GameObject _player2DrawObj;                 //Instantiated object of Player 2's draw pile
+    private GameObject _player2WonObj;                  //Instantiated object of Player 2's won pile
+    private SceneCard _player2CardObj;                  //Instantiated object of Player 2's active card (reused for all play)
+
+    /// <summary>
+    /// Set references to the PlayerHands for this game. Performs Setup for player visual objects
+    /// </summary>
+    /// <param name="players">PlayerHand references</param>
+    public void SetPlayerReferences(PlayerHand[] players){
         _players = players;
 
         //Player 1
@@ -89,14 +99,23 @@ public class GameTable : MonoBehaviour
         player2SuitCardObj.SetActive(false);
         _player2CardObj = player2SuitCardObj.GetComponent<SceneCard>();
     }
-    public void UpdateCardVisuals()
-    {
+    /// <summary>
+    /// Updates the state of the player objects to reflect current card counts.
+    /// </summary>
+    public void UpdateCardVisuals(){
         //Check player draw piles and won piles sizes
 
         //Update Text displays
     }
-    public IEnumerator ShowPlayerCards(Card player1Card, Card player2Card, int winnerIndex, Action completedCallback = null)
-    {
+    /// <summary>
+    /// Lerps player cards from respective Draw piles to center of table, then lerps to player's pot for player 'winnerIndex'
+    /// </summary>
+    /// <param name="player1Card">Reference to Player 1's card</param>
+    /// <param name="player2Card">Reference to Player 2's card</param>
+    /// <param name="winnerIndex">Index of player that wins cards. -1 if no winner</param>
+    /// <param name="completedCallback">Callback for when all lerps are complete</param>
+    /// <returns>IEnumerator. Use StartCoroutine.</returns>
+    public IEnumerator ShowPlayerCards(Card player1Card, Card player2Card, int winnerIndex, Action completedCallback = null){
         //Update card displays
         _player1CardObj.gameObject.SetActive(true);
         _player1CardObj.SetCardVisuals(player1Card);
@@ -125,8 +144,7 @@ public class GameTable : MonoBehaviour
         while (Time.time < pauseTime)
             yield return null;
 
-        if(winnerIndex != -1)//Only lerp to a pile if there's not a War
-        {
+        if(winnerIndex != -1){//Only lerp to a pile if there's not a War
             //Lerp cards to winner's pile
             Transform winnerTransform = (winnerIndex == 0) ? _player1WonObj.transform : _player2WonObj.transform;
             cardLerpsComplete = 0;
@@ -145,19 +163,23 @@ public class GameTable : MonoBehaviour
        
         completedCallback?.Invoke();
     }
-    public IEnumerator ShowPlayerWar(int player1CardCount, int player2CardCount, Action completedCallback = null)
-    {
+    /// <summary>
+    /// Lerps player cards from respective Draw piles to center of table, for showing players going to War.
+    /// </summary>
+    /// <param name="player1CardCount">How many cards Player 1 contributes to War</param>
+    /// <param name="player2CardCount">How many cards Player 2 contributes to War</param>
+    /// <param name="completedCallback">Callback for when all lerps are complete</param>
+    /// <returns>IEnumerator. Use StartCoroutine</returns>
+    public IEnumerator ShowPlayerWar(int player1CardCount, int player2CardCount, Action completedCallback = null){
         _player1CardObj.gameObject.SetActive(true);
         _player1CardObj.SetCardVisuals(null);
         _player2CardObj.gameObject.SetActive(true);
         _player2CardObj.SetCardVisuals(null);
 
         //Lerp 3 cards to position (pile below display)
-        while (player1CardCount > 0 || player2CardCount > 0)
-        {
+        while (player1CardCount > 0 || player2CardCount > 0){
             int cardLerpsRunning = 0;
-            if(player1CardCount > 0)
-            {
+            if(player1CardCount > 0){
                 player1CardCount--;
                 cardLerpsRunning++;
                 _player1CardObj.transform.position = _player1_DrawPile.transform.position;
@@ -166,8 +188,7 @@ public class GameTable : MonoBehaviour
                     cardLerpsRunning--;
                 }));
             }
-            if(player2CardCount > 0)
-            {
+            if(player2CardCount > 0){
                 player2CardCount--;
                 cardLerpsRunning++;
                 _player2CardObj.transform.position = _player2_DrawPile.transform.position;
@@ -185,19 +206,29 @@ public class GameTable : MonoBehaviour
         _player2CardObj.gameObject.SetActive(false);
         completedCallback?.Invoke();
     }
-    public void RunShuffleAnimation()
-    {
-
+    /// <summary>
+    /// Runs Game Start shuffle animation
+    /// </summary>
+    /// <param name="completedCallback">Callback for when all animations are complete</param>
+    /// <returns>IEnumerator. Use StartCoroutine</returns>
+    public IEnumerator RunShuffleAnimation(Action completedCallback = null){
+        completedCallback?.Invoke();
+        yield break;
     }
-    IEnumerator LerpCardObjectToTransform(Transform cardTransform, Transform targetTransform, Action completedCallback = null)
-    {
+    /// <summary>
+    /// Lerps a card from current position and rotation to match that of 'targetTransform'
+    /// </summary>
+    /// <param name="cardTransform">The transform to lerp</param>
+    /// <param name="targetTransform">The transform to use as end point.</param>
+    /// <param name="completedCallback">Callback for when lerp is complete</param>
+    /// <returns>IEnumerator. Use StartCoroutine</returns>
+    private IEnumerator LerpCardObjectToTransform(Transform cardTransform, Transform targetTransform, Action completedCallback = null){
         Vector3 startPos = cardTransform.position;
         Quaternion startRot = cardTransform.rotation;
 
         float startTime = Time.time;
         float endTime = startTime + _cardPlayLerpTime;
-        while(Time.time < endTime)
-        {
+        while(Time.time < endTime){
             float percent = (Time.time - startTime) / _cardPlayLerpTime;
             cardTransform.position = Vector3.Lerp(startPos, targetTransform.position, percent);
             cardTransform.rotation = Quaternion.Lerp(startRot, targetTransform.rotation, percent);

@@ -6,19 +6,18 @@ using System.Collections.Generic;
 /// GameLogic - Core class for turn ordering and player instantiation and management
 /// </summary>
 public class GameLogic : MonoBehaviour{
-    private const int PlayerCount = 2;              //How many players are in this game
-    private const int WarCardTargetCount = 3;       //How many cards are used in a "War" pile
+    
+    private const int PlayerCount = 2;                  //How many players are in this game
+    private const int WarCardTargetCount = 3;           //How many cards are used in a "War" pile
 
-    //[SerializeField]
-    //private float _turnDelay = 1f;                  //How long each turn will wait before automatically proceeding
     [SerializeField]
-    private GameTable _gameTableReference;          //Reference to scene's game table for card visuals
+    private GameTable _gameTableReference;              //Reference to scene's game table for card visuals
 
-    private DeckOfCards _deckOfCards;               //Reference to this game's Card deck
-    private PlayerHand[] _players;                  //Array of players in this game (size 'PlayerCount')
-    private List<Card> _turnCardPot;                //List of Card references that holds the pot for each turn
-    private int _gamesCompleted = 0;                //Internal tracker for how many games are finished during a session.
-    private bool _runningGameAnimations = false;
+    private DeckOfCards _deckOfCards;                   //Reference to this game's Card deck
+    private PlayerHand[] _players;                      //Array of players in this game (size 'PlayerCount')
+    private List<Card> _turnCardPot;                    //List of Card references that holds the pot for each turn
+    private int _gamesCompleted = 0;                    //Internal tracker for how many games are finished during a session.
+    private bool _runningGameAnimations = false;        //Flag used to wait or proceed based on visual animations.
 
     /// <summary>
     /// Initial reference creations

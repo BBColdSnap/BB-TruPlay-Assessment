@@ -1,11 +1,23 @@
 using UnityEngine;
 
+/// <summary>
+/// MainMenu - Basic UI interface for landing or starting a game
+/// </summary>
 public class MainMenu : MonoBehaviour{
-    public string GameSceneName;
 
+    //Inspector Fields
+    [SerializeField]
+    private string _gameSceneName;                      //Scene to load for sameplay
+
+    /// <summary>
+    /// PlayButton callback connected to prefab
+    /// </summary>
     public void PlayButton(){
-        UnityEngine.SceneManagement.SceneManager.LoadScene(GameSceneName, UnityEngine.SceneManagement.LoadSceneMode.Single);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(_gameSceneName, UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
+    /// <summary>
+    /// QuitGameButton callback connected to prefab
+    /// </summary>
     public void QuitGameButton(){
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;

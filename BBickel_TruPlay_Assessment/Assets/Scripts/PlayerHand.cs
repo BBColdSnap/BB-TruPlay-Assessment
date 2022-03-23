@@ -5,8 +5,9 @@ using System.Collections.Generic;
 /// PlayerHand - Reference of a player. Manage's the player's card pile(s).
 /// </summary>
 public class PlayerHand{
-    private List<Card> _playerCards;                //Cards the player can draw from
-    private List<Card> _playerWonCards;             //Cards the player has won (will move to _playerCards if empty)
+    
+    private List<Card> _playerCards;                    //Cards the player can draw from
+    private List<Card> _playerWonCards;                 //Cards the player has won (will move to _playerCards if empty)
     
     /// <summary>
     /// Public constructor
