@@ -10,8 +10,6 @@ public class GameLogic : MonoBehaviour{
     //Public Constant Values
     public static readonly string 
         ShortenedGamesKey = "ShortGamesEnabled";        //PlayerPrefs key for short games enabled
-    public static readonly string 
-        PlayerChoiceKey = "PlayerChoiceEnabled";        //PlayerPrefs key for player choice of cards enabled
 
     // Private Constant Members
     private const int PlayerCount = 2;                  //How many players are in this game

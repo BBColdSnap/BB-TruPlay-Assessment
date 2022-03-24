@@ -15,15 +15,12 @@ public class MainMenu : MonoBehaviour{
     private string _gameSceneName;                      //Scene to load for sameplay
     [SerializeField]
     private Toggle _shortenedGamesToggle;               //Toggle reference to turn on/off checkmark for Shortened Games
-    [SerializeField]
-    private Toggle _cardChoiceToggle;                   //Toggle reference to turn on/off checkmark for Player Card Choices
 
     private void Start() {
         _titlePanel.SetActive(true);
         _optionsPanel.SetActive(false);
 
         _shortenedGamesToggle.isOn = PlayerPrefs.GetInt(GameLogic.ShortenedGamesKey) == 1;
-        _cardChoiceToggle.isOn = PlayerPrefs.GetInt(GameLogic.PlayerChoiceKey) == 1;
     }
     /// <summary>
     /// PlayButton callback connected to prefab. Loads the _gameSceneName Scene
@@ -31,6 +28,9 @@ public class MainMenu : MonoBehaviour{
     public void PlayButton(){
         UnityEngine.SceneManagement.SceneManager.LoadScene(_gameSceneName, UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
+    /// <summary>
+    /// OptionsButton callback connected to prefab. Opens the Options panel.
+    /// </summary>
     public void OptionsButton() {
         _titlePanel.SetActive(false);
         _optionsPanel.SetActive(true);
@@ -45,14 +45,16 @@ public class MainMenu : MonoBehaviour{
         Application.Quit();
 #endif
     }
+    /// <summary>
+    /// ShortGamesButton callback connected to prefab. Sets game mode to short version in PlayerPrefs
+    /// </summary>
     public void ShortGamesButton() {
         _shortenedGamesToggle.isOn = !_shortenedGamesToggle.isOn;
         PlayerPrefs.SetInt(GameLogic.ShortenedGamesKey, _shortenedGamesToggle.isOn ? 1 : 0);
     }
-    public void CardChoicebutton() {
-        _cardChoiceToggle.isOn = !_cardChoiceToggle.isOn;
-        PlayerPrefs.SetInt(GameLogic.PlayerChoiceKey, _cardChoiceToggle.isOn ? 1 : 0);
-    }
+    /// <summary>
+    /// OptionsBackButton callback connected to prefab. Returns to TitleMenu from Options menu
+    /// </summary>
     public void OptionsBackButton() {
         _titlePanel.SetActive(true);
         _optionsPanel.SetActive(false);
