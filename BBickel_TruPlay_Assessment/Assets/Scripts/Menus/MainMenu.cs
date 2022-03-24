@@ -49,7 +49,6 @@ public class MainMenu : MonoBehaviour{
     /// ShortGamesButton callback connected to prefab. Sets game mode to short version in PlayerPrefs
     /// </summary>
     public void ShortGamesButton() {
-        _shortenedGamesToggle.isOn = !_shortenedGamesToggle.isOn;
         PlayerPrefs.SetInt(GameLogic.ShortenedGamesKey, _shortenedGamesToggle.isOn ? 1 : 0);
     }
     /// <summary>
