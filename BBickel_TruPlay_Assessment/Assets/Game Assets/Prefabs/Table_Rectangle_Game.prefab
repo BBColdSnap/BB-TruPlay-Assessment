@@ -213,6 +213,7 @@ MonoBehaviour:
   _smallDiscardPrefab: {fileID: 5716832388506142777, guid: d219b461ae8168143bb54589ea0265e1, type: 3}
   _cardPrefab: {fileID: 1722255199895989722, guid: adc9d2346f745734fa400d2c7e1dcf1d, type: 3}
   _cardPlayLerpTime: 0.5
+  _cardStackYBuffer: 0.0025
 --- !u!33 &2311874766597727996
 MeshFilter:
   m_ObjectHideFlags: 0

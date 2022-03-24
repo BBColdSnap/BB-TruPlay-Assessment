@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -38,7 +39,8 @@ public class GameTable : MonoBehaviour{
 
     [SerializeField]
     private float _cardPlayLerpTime = 0.5f;             //Duration for each card to lerp from Draw pile to the end play position
-
+    [SerializeField]
+    private float _cardStackYBuffer = 0.0025f;          //Slight position adjustment to prevent Z fighting on stacked cards.
     //Private Members
     private PlayerHand[] _players;                      //References to game's players. Used to read card counts remaining.
 
@@ -53,7 +55,15 @@ public class GameTable : MonoBehaviour{
     private GameObject _player2WonObj_Large;            //Instantiated object of Player 2's won pile (Large)
     private GameObject _player2WonObj_Small;            //Instantiated object of Player 2's won pile (Small)
     private SceneCard _player2CardObj;                  //Instantiated object of Player 2's active card (reused for all play)
+    
+    private List<GameObject> _cardPoolList;
 
+    /// <summary>
+    /// Initial reference creations
+    /// </summary>
+    private void Awake() {
+        _cardPoolList = new List<GameObject>();
+    }
     /// <summary>
     /// Set references to the PlayerHands for this game. Performs Setup for player visual objects
     /// </summary>
@@ -186,20 +196,26 @@ public class GameTable : MonoBehaviour{
         while (Time.time < pauseTime)
             yield return null;
 
-        if(winnerIndex != -1){//Only lerp to a pile if there's not a War
-            //Lerp cards to winner's pile
-            Transform winnerTransform = (winnerIndex == 0) ? _player1WonObj_Large.transform : _player2WonObj_Large.transform;
-            cardLerpsComplete = 0;
-            StartCoroutine(LerpCardObjectToTransform(_player1CardObj.transform, winnerTransform, () => {
-                _player1CardObj.gameObject.SetActive(false);
-                cardLerpsComplete++;
-            }));
-            StartCoroutine(LerpCardObjectToTransform(_player2CardObj.transform, winnerTransform, () => {
-                _player2CardObj.gameObject.SetActive(false);
-                cardLerpsComplete++;
-            }));
+        CopyObjectToPool(_player1CardObj.gameObject);
+        CopyObjectToPool(_player2CardObj.gameObject);
+        _player1CardObj.gameObject.SetActive(false);
+        _player2CardObj.gameObject.SetActive(false);
 
-            while (cardLerpsComplete < 2)
+        if (winnerIndex != -1){//Only lerp to a pile if there's not a War
+
+            Transform winnerTransform = (winnerIndex == 0) ? _player1WonObj_Large.transform : _player2WonObj_Large.transform;
+            int cardLerpsRunning = _cardPoolList.Count;
+            for(int i=0; i<_cardPoolList.Count; i++) {
+                GameObject lerpCardObj = _cardPoolList[i];
+                StartCoroutine(LerpCardObjectToTransform(lerpCardObj.transform, winnerTransform, () => {
+                    lerpCardObj.SetActive(false);
+                    Destroy(lerpCardObj);
+                    cardLerpsRunning--;
+                }));
+            }
+            _cardPoolList.Clear();
+
+            while (cardLerpsRunning > 0)
                 yield return null;
         }
        
@@ -227,6 +243,7 @@ public class GameTable : MonoBehaviour{
                 _player1CardObj.transform.position = _player1_DrawPile.transform.position;
                 _player1CardObj.transform.rotation = _player1_DrawPile.transform.rotation;
                 StartCoroutine(LerpCardObjectToTransform(_player1CardObj.transform, _player1_TurnCard.transform, () => {
+                    CopyObjectToPool(_player1CardObj.gameObject);
                     cardLerpsRunning--;
                 }));
             }
@@ -236,6 +253,7 @@ public class GameTable : MonoBehaviour{
                 _player2CardObj.transform.position = _player2_DrawPile.transform.position;
                 _player2CardObj.transform.rotation = _player2_DrawPile.transform.rotation;
                 StartCoroutine(LerpCardObjectToTransform(_player2CardObj.transform, _player2_TurnCard.transform, () => {
+                    CopyObjectToPool(_player2CardObj.gameObject);
                     cardLerpsRunning--;
                 }));
             }
@@ -268,16 +286,35 @@ public class GameTable : MonoBehaviour{
         Vector3 startPos = cardTransform.position;
         Quaternion startRot = cardTransform.rotation;
 
+        float yValue = DetermineCardPoolYMax(targetTransform.position.y);
+        Vector3 targetPosition = (Vector3.right * targetTransform.position.x) + (Vector3.up * yValue) + (Vector3.forward * targetTransform.position.z);
+
         float startTime = Time.time;
         float endTime = startTime + _cardPlayLerpTime;
         while(Time.time < endTime){
             float percent = (Time.time - startTime) / _cardPlayLerpTime;
-            cardTransform.position = Vector3.Lerp(startPos, targetTransform.position, percent);
+            cardTransform.position = Vector3.Lerp(startPos, targetPosition, percent);
             cardTransform.rotation = Quaternion.Lerp(startRot, targetTransform.rotation, percent);
             yield return null;
         }
-        cardTransform.position = targetTransform.position;
+        
+        cardTransform.position = targetPosition;
         cardTransform.rotation = targetTransform.rotation;
         completedCallback?.Invoke();
+    }
+    private void CopyObjectToPool(GameObject cardObject) {
+        GameObject cardCopyObject = Instantiate(cardObject);
+        cardCopyObject.transform.SetParent(cardObject.transform.parent);
+        cardCopyObject.transform.SetPositionAndRotation(cardObject.transform.position, cardObject.transform.rotation);
+        cardCopyObject.transform.localScale = cardObject.transform.localScale;
+        _cardPoolList.Add(cardCopyObject);
+    }
+    private float DetermineCardPoolYMax(float defaultY) {
+        float maxY = defaultY;
+        for(int i=0; i<_cardPoolList.Count; i++) {
+            if (_cardPoolList[i].transform.position.y >= maxY)
+                maxY = _cardPoolList[i].transform.position.y + _cardStackYBuffer;
+        }
+        return maxY;
     }
 }

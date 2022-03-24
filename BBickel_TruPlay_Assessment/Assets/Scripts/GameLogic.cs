@@ -132,7 +132,7 @@ public class GameLogic : MonoBehaviour{
         }
 
         UpdatePlayerCardDisplays();
-        if (triggerWar == false){
+        if (triggerWar == false){                       //Normal Turn
             _runningGameAnimations = true;
             int lastIndex = _turnCardPot.Count - 1;
             StartCoroutine(_gameTableReference.ShowPlayerCards(_turnCardPot[lastIndex-1], _turnCardPot[lastIndex], maxCardPlayer, () => {
@@ -143,7 +143,7 @@ public class GameLogic : MonoBehaviour{
                 if (_logToConsole) Debug.Log("Player " + maxCardPlayer + " takes pot - " + _players[maxCardPlayer].GetTotalCardCount());
             }));
         }
-        else{
+        else{                                           //Go to War
             _runningGameAnimations = true;
             int lastIndex = _turnCardPot.Count - 1;
             StartCoroutine(_gameTableReference.ShowPlayerCards(_turnCardPot[lastIndex], _turnCardPot[lastIndex - 1], -1, () => {
