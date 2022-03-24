@@ -18,6 +18,8 @@ public class GameLogic : MonoBehaviour{
     private GameTable _gameTableReference;              //Reference to scene's game table for card visuals
     [SerializeField]
     private GameUI _gameUIReference;                    //Reference to scene's UI for card counts
+    [SerializeField]
+    private ShuffleAnimation _shuffleAnimationObj;      //Reference to scene's Shuffle Animation object
 
     //Private Members
     private DeckOfCards _deckOfCards;                   //Reference to this game's Card deck
@@ -57,8 +59,10 @@ public class GameLogic : MonoBehaviour{
     /// Deal cards and start turn process.
     /// </summary>
     private void RestartGame() {
-        DealCards();
-        StartCoroutine(RunTurnsOnDelay());
+        StartCoroutine(_shuffleAnimationObj.PlayShuffleAnimation(()=> {
+            DealCards();
+            StartCoroutine(RunTurnsOnDelay());
+        }));
     }
     /// <summary>
     /// Automate turns for now, no user action required
