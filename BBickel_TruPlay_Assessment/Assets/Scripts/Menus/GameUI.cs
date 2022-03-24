@@ -27,6 +27,10 @@ public class GameUI : MonoBehaviour
     [SerializeField]
     private GameObject _playButtonObject;               //UI Play Button. Shows and hides contextually.
     [SerializeField]
+    private GameObject _playerWinLabel;                 //UI Text to display when the player wins
+    [SerializeField]
+    private GameObject _playerLoseLabel;                //UI Text to display when the player loses
+    [SerializeField]
     private Slider _timeScaleSlider;                    //UI Slider for time scale adjustment
     [SerializeField]
     private float _timeScaleMin = 1f;                   //Minimum Time scale value
@@ -51,6 +55,8 @@ public class GameUI : MonoBehaviour
     /// </summary>
     private void Start() {
         _playButtonObject.SetActive(false);
+        _playerWinLabel.gameObject.SetActive(false);
+        _playerLoseLabel.gameObject.SetActive(false);
         _timeScaleSlider.value = Mathf.InverseLerp(_timeScaleMin, _timeScaleMax, Time.timeScale);
     }
     /// <summary>
@@ -65,16 +71,19 @@ public class GameUI : MonoBehaviour
     public void PlayButton() {
         PlayButtonPressed?.Invoke();
         _playButtonObject.SetActive(false);
+        _playerWinLabel.gameObject.SetActive(false);
+        _playerLoseLabel.gameObject.SetActive(false);
     }
     /// <summary>
     /// Public method to indicate a game as completed
     /// </summary>
     public void GameOver(bool playerWon) {
-
         AudioClip gameOverClip = (playerWon) ? _gameWonAudio : _gameLostAudio;
         _audioSource.clip = gameOverClip;
         _audioSource.Play();
         _playButtonObject.SetActive(true);
+        _playerWinLabel.gameObject.SetActive(playerWon);
+        _playerLoseLabel.gameObject.SetActive(!playerWon);
     }
     /// <summary>
     /// Public method to update the card count labels for both players.
