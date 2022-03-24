@@ -40,29 +40,35 @@ public class GameTable : MonoBehaviour{
     [SerializeField]
     private float _cardPlayLerpTime = 0.5f;             //Duration for each card to lerp from Draw pile to the end play position
     [SerializeField]
+    private AudioClip _cardDealAudioClip;               //Audio clip for when a card is dealt/lerped
+    [SerializeField]
     private float _cardStackYBuffer = 0.0025f;          //Slight position adjustment to prevent Z fighting on stacked cards.
+    
     //Private Members
     private PlayerHand[] _players;                      //References to game's players. Used to read card counts remaining.
 
     private GameObject _player1DrawObj_Large;           //Instantiated object of Player 1's draw pile (Large)
     private GameObject _player1DrawObj_Small;           //Instantiated object of Player 1's draw pile (Small)
     private GameObject _player1WonObj_Large;            //Instantiated object of Player 1's won pile (Large)
-    private GameObject _player1WonObj_Small;            //Instantiated object of Player 1's won pile (Small
-    private SceneCard _player1CardObj;                  //Instantiated object of Player 1's active card (reused for all play)
+    private GameObject _player1WonObj_Small;            //Instantiated object of Player 1's won pile (Small)
+    private SceneCard _player1CardObj;                  //Instantiated object of Player 1's active card (reused for dealing, copied for pool)
 
     private GameObject _player2DrawObj_Large;           //Instantiated object of Player 2's draw pile (Large)
     private GameObject _player2DrawObj_Small;           //Instantiated object of Player 2's draw pile (Small)
     private GameObject _player2WonObj_Large;            //Instantiated object of Player 2's won pile (Large)
     private GameObject _player2WonObj_Small;            //Instantiated object of Player 2's won pile (Small)
-    private SceneCard _player2CardObj;                  //Instantiated object of Player 2's active card (reused for all play)
-    
-    private List<GameObject> _cardPoolList;
+    private SceneCard _player2CardObj;                  //Instantiated object of Player 2's active card (reused for dealing, copied for pool)
+
+    private AudioSource _audioSource;                    //Audio Source for playing Card sound effects;
+    private List<GameObject> _cardPoolList;             //Card pool waiting to be lerped to a winning player.
 
     /// <summary>
     /// Initial reference creations
     /// </summary>
     private void Awake() {
         _cardPoolList = new List<GameObject>();
+        _audioSource = GetComponent<AudioSource>();
+        _audioSource.clip = _cardDealAudioClip;
     }
     /// <summary>
     /// Set references to the PlayerHands for this game. Performs Setup for player visual objects
@@ -168,6 +174,9 @@ public class GameTable : MonoBehaviour{
     /// <param name="completedCallback">Callback for when all lerps are complete</param>
     /// <returns>IEnumerator. Use StartCoroutine.</returns>
     public IEnumerator ShowPlayerCards(Card player1Card, Card player2Card, int winnerIndex, Action completedCallback = null){
+
+        _audioSource.Play();
+
         //Update card displays
         _player1CardObj.gameObject.SetActive(true);
         _player1CardObj.SetCardVisuals(player1Card);
@@ -202,7 +211,6 @@ public class GameTable : MonoBehaviour{
         _player2CardObj.gameObject.SetActive(false);
 
         if (winnerIndex != -1){//Only lerp to a pile if there's not a War
-
             Transform winnerTransform = (winnerIndex == 0) ? _player1WonObj_Large.transform : _player2WonObj_Large.transform;
             int cardLerpsRunning = _cardPoolList.Count;
             for(int i=0; i<_cardPoolList.Count; i++) {
@@ -236,6 +244,8 @@ public class GameTable : MonoBehaviour{
 
         //Lerp 3 cards to position (pile below display)
         while (player1CardCount > 0 || player2CardCount > 0){
+            _audioSource.Play();
+
             int cardLerpsRunning = 0;
             if(player1CardCount > 0){
                 player1CardCount--;

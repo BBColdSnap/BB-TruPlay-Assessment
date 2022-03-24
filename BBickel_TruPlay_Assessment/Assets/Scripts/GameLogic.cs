@@ -77,7 +77,7 @@ public class GameLogic : MonoBehaviour{
 
             bool gameOver = CheckForGameOver();
             if (gameOver == true) {
-                _gameUIReference.GameOver();
+                _gameUIReference.GameOver(_players[0].GetTotalCardCount() > 0);
                 yield break;
             }
         }

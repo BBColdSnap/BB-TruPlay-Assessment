@@ -32,7 +32,20 @@ public class GameUI : MonoBehaviour
     private float _timeScaleMin = 1f;                   //Minimum Time scale value
     [SerializeField]
     private float _timeScaleMax = 100f;                 //Maximum Time scale value
+    [SerializeField]
+    private AudioClip _gameWonAudio;                    //Player Won audio clip
+    [SerializeField]
+    private AudioClip _gameLostAudio;                   //Player Lost audio clip
 
+    //Private Members
+    private AudioSource _audioSource;                   //Audio source on object to play audio
+
+    /// <summary>
+    /// Initial reference creations
+    /// </summary>
+    private void Awake() {
+        _audioSource = GetComponent<AudioSource>();
+    }
     /// <summary>
     /// Set up default menu state.
     /// </summary>
@@ -56,7 +69,11 @@ public class GameUI : MonoBehaviour
     /// <summary>
     /// Public method to indicate a game as completed
     /// </summary>
-    public void GameOver() {
+    public void GameOver(bool playerWon) {
+
+        AudioClip gameOverClip = (playerWon) ? _gameWonAudio : _gameLostAudio;
+        _audioSource.clip = gameOverClip;
+        _audioSource.Play();
         _playButtonObject.SetActive(true);
     }
     /// <summary>
