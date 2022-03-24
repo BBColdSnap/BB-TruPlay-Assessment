@@ -69,8 +69,10 @@ public class GameLogic : MonoBehaviour{
         for (int i = 0; i < PlayerCount; i++)
             _players[i].SetPlayerWarsWon(0);
 
+        _gameUIReference.SetControlsVisible(false);
         StartCoroutine(_shuffleAnimationObj.PlayShuffleAnimation(()=> {
             DealCards();
+            _gameUIReference.SetControlsVisible(true);
             StartCoroutine(RunTurnsOnDelay());
         }));
     }

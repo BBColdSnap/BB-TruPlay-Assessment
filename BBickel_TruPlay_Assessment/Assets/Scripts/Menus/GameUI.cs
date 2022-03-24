@@ -43,7 +43,7 @@ public class GameUI : MonoBehaviour
     [SerializeField]
     private float _timeScaleMin = 1f;                   //Minimum Time scale value
     [SerializeField]
-    private float _timeScaleMax = 100f;                 //Maximum Time scale value
+    private float _timeScaleMax = 30f;                 //Maximum Time scale value
     [SerializeField]
     private AudioClip _gameWonAudio;                    //Player Won audio clip
     [SerializeField]
@@ -112,6 +112,19 @@ public class GameUI : MonoBehaviour
         _player2CardCountLabel.text = player2.GetDrawPileCount().ToString();
         _player2WonCountLabel.text = player2.GetWonPileCount().ToString();
         _player2WarCountLabel.text = string.Format(_warLabelFormatText, player2.GetPlayerWarsWon());
+    }
+    /// <summary>
+    /// Function to set initial labels/controls visible
+    /// </summary>
+    /// <param name="isVisible"></param>
+    public void SetControlsVisible(bool isVisible) {
+        _player1CardCountLabel.gameObject.SetActive(isVisible);
+        _player1WonCountLabel.gameObject.SetActive(isVisible);
+        _player1WarCountLabel.gameObject.SetActive(isVisible);
+        _player2CardCountLabel.gameObject.SetActive(isVisible);
+        _player2WonCountLabel.gameObject.SetActive(isVisible);
+        _player2WarCountLabel.gameObject.SetActive(isVisible);
+        _timeScaleSlider.gameObject.SetActive(isVisible);
     }
     /// <summary>
     /// Callback for Slider UI control
