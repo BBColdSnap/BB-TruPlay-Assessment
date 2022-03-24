@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
@@ -25,12 +26,19 @@ public class GameUI : MonoBehaviour
     private TextMeshProUGUI _player2WonCountLabel;      //Scene to load for sameplay
     [SerializeField]
     private GameObject _playButtonObject;               //UI Play Button. Shows and hides contextually.
+    [SerializeField]
+    private Slider _timeScaleSlider;                    //UI Slider for time scale adjustment
+    [SerializeField]
+    private float _timeScaleMin = 1f;                   //Minimum Time scale value
+    [SerializeField]
+    private float _timeScaleMax = 100f;                 //Maximum Time scale value
 
     /// <summary>
     /// Set up default menu state.
     /// </summary>
     private void Start() {
         _playButtonObject.SetActive(false);
+        _timeScaleSlider.value = Mathf.InverseLerp(_timeScaleMin, _timeScaleMax, Time.timeScale);
     }
     /// <summary>
     /// BackButton callback connected to prefab. Loads the _menuSceneName Scene
@@ -61,5 +69,11 @@ public class GameUI : MonoBehaviour
         _player1WonCountLabel.text = player1.GetWonPileCount().ToString();
         _player2CardCountLabel.text = player2.GetDrawPileCount().ToString();
         _player2WonCountLabel.text = player2.GetWonPileCount().ToString();
+    }
+    /// <summary>
+    /// Callback for Slider UI control
+    /// </summary>
+    public void TimeSliderMoved() {
+        Time.timeScale = Mathf.Lerp(_timeScaleMin, _timeScaleMax, _timeScaleSlider.value);
     }
 }
