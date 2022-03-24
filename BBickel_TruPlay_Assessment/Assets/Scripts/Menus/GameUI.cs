@@ -13,17 +13,25 @@ public class GameUI : MonoBehaviour
     //Publicly Accessed Members
     public GameUIEvent PlayButtonPressed;               //Subscribable Event for when we
 
+    //Private Constant Values
+    private readonly string 
+        _warLabelFormatText = "{0} Wars Won";           //Dynamic format text for player war labels
+
     //Inspector Fields
     [SerializeField]
     private string _menuSceneName;                      //Scene to load for sameplay
     [SerializeField]
-    private TextMeshProUGUI _player1CardCountLabel;     //Scene to load for sameplay
+    private TextMeshProUGUI _player1CardCountLabel;     //Cards remaining in Player 1's Draw pile
     [SerializeField]
-    private TextMeshProUGUI _player1WonCountLabel;      //Scene to load for sameplay
+    private TextMeshProUGUI _player1WonCountLabel;      //Cards in Player 1's Won pile
     [SerializeField]
-    private TextMeshProUGUI _player2CardCountLabel;     //Scene to load for sameplay
+    private TextMeshProUGUI _player1WarCountLabel;      //Wars Player 1 has won
     [SerializeField]
-    private TextMeshProUGUI _player2WonCountLabel;      //Scene to load for sameplay
+    private TextMeshProUGUI _player2CardCountLabel;     //Cards remaining in Player 2's Draw pile
+    [SerializeField]
+    private TextMeshProUGUI _player2WonCountLabel;      //Cards in Player 2's Won pile
+    [SerializeField]
+    private TextMeshProUGUI _player2WarCountLabel;      //Wars Player 2 has won
     [SerializeField]
     private GameObject _playButtonObject;               //UI Play Button. Shows and hides contextually.
     [SerializeField]
@@ -86,15 +94,18 @@ public class GameUI : MonoBehaviour
         _playerLoseLabel.gameObject.SetActive(!playerWon);
     }
     /// <summary>
-    /// Public method to update the card count labels for both players.
+    /// Public method to update the labels for both players.
     /// </summary>
     /// <param name="player1">Player 1 Reference</param>
     /// <param name="player2">Player 2 Reference</param>
     public void UpdatePlayerLabels(PlayerHand player1, PlayerHand player2) {
         _player1CardCountLabel.text = player1.GetDrawPileCount().ToString();
         _player1WonCountLabel.text = player1.GetWonPileCount().ToString();
+        _player1WarCountLabel.text = string.Format(_warLabelFormatText, player1.GetPlayerWarsWon());
+
         _player2CardCountLabel.text = player2.GetDrawPileCount().ToString();
         _player2WonCountLabel.text = player2.GetWonPileCount().ToString();
+        _player2WarCountLabel.text = string.Format(_warLabelFormatText, player2.GetPlayerWarsWon());
     }
     /// <summary>
     /// Callback for Slider UI control
