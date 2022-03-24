@@ -16,6 +16,9 @@ public class MainMenu : MonoBehaviour{
     [SerializeField]
     private Toggle _shortenedGamesToggle;               //Toggle reference to turn on/off checkmark for Shortened Games
 
+    /// <summary>
+    /// Initial state setup
+    /// </summary>
     private void Start() {
         _titlePanel.SetActive(true);
         _optionsPanel.SetActive(false);
