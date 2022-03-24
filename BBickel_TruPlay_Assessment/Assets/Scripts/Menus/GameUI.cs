@@ -68,6 +68,12 @@ public class GameUI : MonoBehaviour
         _timeScaleSlider.value = Mathf.InverseLerp(_timeScaleMin, _timeScaleMax, Time.timeScale);
     }
     /// <summary>
+    /// End-of-life cleanup.
+    /// </summary>
+    private void OnDestroy() {
+        Time.timeScale = _timeScaleMin;
+    }
+    /// <summary>
     /// BackButton callback connected to prefab. Loads the _menuSceneName Scene
     /// </summary>
     public void BackButton() {
