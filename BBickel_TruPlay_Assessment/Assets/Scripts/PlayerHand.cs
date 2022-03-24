@@ -9,6 +9,7 @@ public class PlayerHand{
     //Private Members
     private List<Card> _playerCards;                    //Cards the player can draw from
     private List<Card> _playerWonCards;                 //Cards the player has won (will move to _playerCards if empty)
+    private int _playerWonWars;                         //Tracker for how many wars this player has won.
     
     /// <summary>
     /// Public constructor
@@ -68,6 +69,20 @@ public class PlayerHand{
     /// <returns></returns>
     public int GetWonPileCount() {
         return _playerWonCards.Count;
+    }
+    /// <summary>
+    /// Get the total number of wars this player has won.
+    /// </summary>
+    /// <returns>Number of wars won.</returns>
+    public int GetPlayerWarsWon() {
+        return _playerWonWars;
+    }
+    /// <summary>
+    /// Set the number of wars this player has won.
+    /// </summary>
+    /// <param name="warsWon">Number of wars won.</param>
+    public void SetPlayerWarsWon(int warsWon) {
+        _playerWonWars = warsWon;
     }
     /// <summary>
     /// (Editor Only) Print the user's card stack to the console

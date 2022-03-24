@@ -13,17 +13,25 @@ public class GameUI : MonoBehaviour
     //Publicly Accessed Members
     public GameUIEvent PlayButtonPressed;               //Subscribable Event for when we
 
+    //Private Constant Values
+    private readonly string 
+        _warLabelFormatText = "{0} Wars Won";           //Dynamic format text for player war labels
+
     //Inspector Fields
     [SerializeField]
     private string _menuSceneName;                      //Scene to load for sameplay
     [SerializeField]
-    private TextMeshProUGUI _player1CardCountLabel;     //Scene to load for sameplay
+    private TextMeshProUGUI _player1CardCountLabel;     //Cards remaining in Player 1's Draw pile
     [SerializeField]
-    private TextMeshProUGUI _player1WonCountLabel;      //Scene to load for sameplay
+    private TextMeshProUGUI _player1WonCountLabel;      //Cards in Player 1's Won pile
     [SerializeField]
-    private TextMeshProUGUI _player2CardCountLabel;     //Scene to load for sameplay
+    private TextMeshProUGUI _player1WarCountLabel;      //Wars Player 1 has won
     [SerializeField]
-    private TextMeshProUGUI _player2WonCountLabel;      //Scene to load for sameplay
+    private TextMeshProUGUI _player2CardCountLabel;     //Cards remaining in Player 2's Draw pile
+    [SerializeField]
+    private TextMeshProUGUI _player2WonCountLabel;      //Cards in Player 2's Won pile
+    [SerializeField]
+    private TextMeshProUGUI _player2WarCountLabel;      //Wars Player 2 has won
     [SerializeField]
     private GameObject _playButtonObject;               //UI Play Button. Shows and hides contextually.
     [SerializeField]
@@ -35,7 +43,7 @@ public class GameUI : MonoBehaviour
     [SerializeField]
     private float _timeScaleMin = 1f;                   //Minimum Time scale value
     [SerializeField]
-    private float _timeScaleMax = 100f;                 //Maximum Time scale value
+    private float _timeScaleMax = 30f;                 //Maximum Time scale value
     [SerializeField]
     private AudioClip _gameWonAudio;                    //Player Won audio clip
     [SerializeField]
@@ -58,6 +66,12 @@ public class GameUI : MonoBehaviour
         _playerWinLabel.gameObject.SetActive(false);
         _playerLoseLabel.gameObject.SetActive(false);
         _timeScaleSlider.value = Mathf.InverseLerp(_timeScaleMin, _timeScaleMax, Time.timeScale);
+    }
+    /// <summary>
+    /// End-of-life cleanup.
+    /// </summary>
+    private void OnDestroy() {
+        Time.timeScale = _timeScaleMin;
     }
     /// <summary>
     /// BackButton callback connected to prefab. Loads the _menuSceneName Scene
@@ -86,15 +100,31 @@ public class GameUI : MonoBehaviour
         _playerLoseLabel.gameObject.SetActive(!playerWon);
     }
     /// <summary>
-    /// Public method to update the card count labels for both players.
+    /// Public method to update the labels for both players.
     /// </summary>
     /// <param name="player1">Player 1 Reference</param>
     /// <param name="player2">Player 2 Reference</param>
     public void UpdatePlayerLabels(PlayerHand player1, PlayerHand player2) {
         _player1CardCountLabel.text = player1.GetDrawPileCount().ToString();
         _player1WonCountLabel.text = player1.GetWonPileCount().ToString();
+        _player1WarCountLabel.text = string.Format(_warLabelFormatText, player1.GetPlayerWarsWon());
+
         _player2CardCountLabel.text = player2.GetDrawPileCount().ToString();
         _player2WonCountLabel.text = player2.GetWonPileCount().ToString();
+        _player2WarCountLabel.text = string.Format(_warLabelFormatText, player2.GetPlayerWarsWon());
+    }
+    /// <summary>
+    /// Function to set initial labels/controls visible
+    /// </summary>
+    /// <param name="isVisible"></param>
+    public void SetControlsVisible(bool isVisible) {
+        _player1CardCountLabel.gameObject.SetActive(isVisible);
+        _player1WonCountLabel.gameObject.SetActive(isVisible);
+        _player1WarCountLabel.gameObject.SetActive(isVisible);
+        _player2CardCountLabel.gameObject.SetActive(isVisible);
+        _player2WonCountLabel.gameObject.SetActive(isVisible);
+        _player2WarCountLabel.gameObject.SetActive(isVisible);
+        _timeScaleSlider.gameObject.SetActive(isVisible);
     }
     /// <summary>
     /// Callback for Slider UI control

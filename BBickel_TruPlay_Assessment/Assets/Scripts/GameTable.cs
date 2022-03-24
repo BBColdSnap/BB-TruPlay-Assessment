@@ -59,7 +59,7 @@ public class GameTable : MonoBehaviour{
     private GameObject _player2WonObj_Small;            //Instantiated object of Player 2's won pile (Small)
     private SceneCard _player2CardObj;                  //Instantiated object of Player 2's active card (reused for dealing, copied for pool)
 
-    private AudioSource _audioSource;                    //Audio Source for playing Card sound effects;
+    private AudioSource _audioSource;                   //Audio Source for playing Card sound effects;
     private List<GameObject> _cardPoolList;             //Card pool waiting to be lerped to a winning player.
 
     /// <summary>
@@ -312,6 +312,10 @@ public class GameTable : MonoBehaviour{
         cardTransform.rotation = targetTransform.rotation;
         completedCallback?.Invoke();
     }
+    /// <summary>
+    /// Copy the given card object into the card pool to keep it visually present.
+    /// </summary>
+    /// <param name="cardObject">Card object to copy, at same position and rotation</param>
     private void CopyObjectToPool(GameObject cardObject) {
         GameObject cardCopyObject = Instantiate(cardObject);
         cardCopyObject.transform.SetParent(cardObject.transform.parent);
@@ -319,6 +323,11 @@ public class GameTable : MonoBehaviour{
         cardCopyObject.transform.localScale = cardObject.transform.localScale;
         _cardPoolList.Add(cardCopyObject);
     }
+    /// <summary>
+    /// Checks all the cards in the object pool for the maximum Y position. Used to ensure cards stack properly
+    /// </summary>
+    /// <param name="defaultY"></param>
+    /// <returns></returns>
     private float DetermineCardPoolYMax(float defaultY) {
         float maxY = defaultY;
         for(int i=0; i<_cardPoolList.Count; i++) {

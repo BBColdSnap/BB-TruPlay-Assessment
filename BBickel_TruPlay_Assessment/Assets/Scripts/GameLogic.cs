@@ -7,9 +7,14 @@ using System.Collections.Generic;
 /// </summary>
 public class GameLogic : MonoBehaviour{
 
-    // Constant Members
+    //Public Constant Values
+    public static readonly string 
+        ShortenedGamesKey = "ShortGamesEnabled";        //PlayerPrefs key for short games enabled
+
+    // Private Constant Members
     private const int PlayerCount = 2;                  //How many players are in this game
     private const int WarCardTargetCount = 3;           //How many cards are used in a "War" pile
+    private const int ShortGameWarWinCount = 3;         //How many Wars does a player have to win in "Short" mode
 
     //Inspector Fields
     [SerializeField]
@@ -27,6 +32,7 @@ public class GameLogic : MonoBehaviour{
     private List<Card> _turnCardPot;                    //List of Card references that holds the pot for each turn
     private int _gamesCompleted = 0;                    //Internal tracker for how many games are finished during a session.
     private bool _runningGameAnimations = false;        //Flag used to wait or proceed based on visual animations.
+    private bool _playingShortenedGame = false;         //Flag to indicate if we should end the game after certainnumber of Wars won
 
     /// <summary>
     /// Initial reference creations
@@ -45,6 +51,7 @@ public class GameLogic : MonoBehaviour{
     /// Gameplay setup and begin
     /// </summary>
     private void Start(){
+        _playingShortenedGame = PlayerPrefs.GetInt(ShortenedGamesKey) == 1;
         _gameTableReference.SetPlayerReferences(_players);
         _gameUIReference.PlayButtonPressed += RestartGame;
         RestartGame();
@@ -59,8 +66,13 @@ public class GameLogic : MonoBehaviour{
     /// Deal cards and start turn process.
     /// </summary>
     private void RestartGame() {
+        for (int i = 0; i < PlayerCount; i++)
+            _players[i].SetPlayerWarsWon(0);
+
+        _gameUIReference.SetControlsVisible(false);
         StartCoroutine(_shuffleAnimationObj.PlayShuffleAnimation(()=> {
             DealCards();
+            _gameUIReference.SetControlsVisible(true);
             StartCoroutine(RunTurnsOnDelay());
         }));
     }
@@ -75,9 +87,12 @@ public class GameLogic : MonoBehaviour{
             while (_runningGameAnimations == true)
                 yield return null;
 
-            bool gameOver = CheckForGameOver();
-            if (gameOver == true) {
+            if (CheckForGameOver_AllCards() == true) {
                 _gameUIReference.GameOver(_players[0].GetTotalCardCount() > 0);
+                yield break;
+            }
+            if(_playingShortenedGame == true && CheckForGameOver_WarsWon()) {
+                _gameUIReference.GameOver(_players[0].GetPlayerWarsWon() >= ShortGameWarWinCount);
                 yield break;
             }
         }
@@ -137,6 +152,10 @@ public class GameLogic : MonoBehaviour{
             int lastIndex = _turnCardPot.Count - 1;
             StartCoroutine(_gameTableReference.ShowPlayerCards(_turnCardPot[lastIndex-1], _turnCardPot[lastIndex], maxCardPlayer, () => {
                 _runningGameAnimations = false;
+
+                if (_turnCardPot.Count > 2)//Player has won at War
+                    AddPlayerWarWon(maxCardPlayer);
+
                 _players[maxCardPlayer].AddCardsToBottom(_turnCardPot.ToArray());
                 _turnCardPot.Clear();
                 UpdatePlayerCardDisplays();
@@ -178,6 +197,9 @@ public class GameLogic : MonoBehaviour{
             int losingPlayerIndex = (playerAutoWinIndex == warPlayer1) ? warPlayer2 : warPlayer1;
             while (_players[losingPlayerIndex].GetTotalCardCount() > 0)
                 _turnCardPot.Add(_players[losingPlayerIndex].DrawTopCard());
+
+            AddPlayerWarWon(playerAutoWinIndex);
+            
             _players[playerAutoWinIndex].AddCardsToBottom(_turnCardPot.ToArray());
             _turnCardPot.Clear();
             if (_logToConsole) Debug.Log("Player " + playerAutoWinIndex + " takes pot War (early)- " + _players[playerAutoWinIndex].GetTotalCardCount());
@@ -214,17 +236,37 @@ public class GameLogic : MonoBehaviour{
             return false;
         }
     }
+    private void AddPlayerWarWon(int playerIndex) {
+        _players[playerIndex].SetPlayerWarsWon(_players[playerIndex].GetPlayerWarsWon() + 1);
+    }
     /// <summary>
     /// Checks if any player has collected all the cards.
     /// </summary>
     /// <returns>True if a player has all the cards.</returns>
-    private bool CheckForGameOver(){
+    private bool CheckForGameOver_AllCards(){
+        
         for (int i = 0; i < PlayerCount; i++){
             if(_players[i].GetTotalCardCount() == DeckOfCards.DeckSize){
-                if (_logToConsole) Debug.LogWarning(string.Format("Player {0} Wins! Games Complete: {1}", (i + 1), ++_gamesCompleted));
+                if (_logToConsole) Debug.LogWarning(string.Format("Player {0} Wins - Gathered all cards! Games Complete: {1}", (i + 1), ++_gamesCompleted));
                 return true;
             }
         }
+       
+        return false;
+    }
+    /// <summary>
+    /// Checks if any player has won enough wars to win the game.
+    /// </summary>
+    /// <returns>True if a player has won by reaching the War goal.</returns>
+    private bool CheckForGameOver_WarsWon() {
+
+        for (int i = 0; i < PlayerCount; i++) {
+            if (_players[i].GetPlayerWarsWon() >= ShortGameWarWinCount) {
+                if (_logToConsole) Debug.LogWarning(string.Format("Player {0} Wins - Won {1} Wars! Games Complete: {2}", (i + 1), ShortGameWarWinCount, ++_gamesCompleted));
+                return true;
+            }
+        }
+
         return false;
     }
     /// <summary>

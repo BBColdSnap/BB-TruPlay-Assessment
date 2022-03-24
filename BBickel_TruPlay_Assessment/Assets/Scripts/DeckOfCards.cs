@@ -11,7 +11,7 @@ public class DeckOfCards{
 
     //Private Members
     private readonly Card[] _cardReferences;            //Array of all cards, regardless of if dealt out or not
-    private int drawIndex = 0;                          //Index position of where to draw next
+    private int _drawIndex = 0;                         //Index position of where to draw next
 
     /// <summary>
     /// Constructor
@@ -28,7 +28,7 @@ public class DeckOfCards{
     /// Shuffle all cards back into deck.
     /// </summary>
     public void Shuffle(){
-        drawIndex = 0;
+        _drawIndex = 0;
         for (int i=0; i< DeckSize; i++){
             for(int j=0; j<DeckSize; j++){
                 if (i == j)
@@ -47,11 +47,11 @@ public class DeckOfCards{
     /// <param name="drawCount">How many cards to try to draw</param>
     /// <returns>Array of 'Card' references. If less than 'drawCount' remaining, will draw all left.</returns>
     public Card[] DrawCards(int drawCount){
-        int availableCount = Mathf.Min(drawCount, DeckSize - drawIndex);//Ensure we don't overdraw cards
+        int availableCount = Mathf.Min(drawCount, DeckSize - _drawIndex);//Ensure we don't overdraw cards
         Card[] cards = new Card[availableCount];
         for (int i = 0; i < availableCount; i++)
-            cards[i] = _cardReferences[drawIndex + i];
-        drawIndex = availableCount;
+            cards[i] = _cardReferences[_drawIndex + i];
+        _drawIndex = availableCount;
         return cards;
     }
     /// <summary>
