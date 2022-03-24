@@ -215,7 +215,7 @@ MonoBehaviour:
   _cardPrefab: {fileID: 1722255199895989722, guid: adc9d2346f745734fa400d2c7e1dcf1d, type: 3}
   _cardPlayLerpTime: 0.5
   _cardDealAudioClip: {fileID: 8300000, guid: 07e635797e539e74da0cf573258085c1, type: 3}
-  _cardStackYBuffer: 0.0025
+  _cardStackYBuffer: 0.005
 --- !u!82 &9040515447655203070
 AudioSource:
   m_ObjectHideFlags: 0
