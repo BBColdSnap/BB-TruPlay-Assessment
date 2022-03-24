@@ -185,7 +185,7 @@ MonoBehaviour:
   _player2WonCountLabel: {fileID: 1296631215}
   _playButtonObject: {fileID: 2021418013}
   _timeScaleSlider: {fileID: 1598920953}
-  _timeScaleMin: 0.5
+  _timeScaleMin: 1
   _timeScaleMax: 100
 --- !u!1 &146610349
 GameObject:
