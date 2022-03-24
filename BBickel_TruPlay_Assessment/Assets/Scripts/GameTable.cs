@@ -286,7 +286,7 @@ public class GameTable : MonoBehaviour{
         yield break;
     }
     /// <summary>
-    /// Lerps a card from current position and rotation to match that of 'targetTransform'
+    /// Lerps a card from current position, rotation, and scale to match that of 'targetTransform'
     /// </summary>
     /// <param name="cardTransform">The transform to lerp</param>
     /// <param name="targetTransform">The transform to use as end point.</param>
@@ -295,6 +295,7 @@ public class GameTable : MonoBehaviour{
     private IEnumerator LerpCardObjectToTransform(Transform cardTransform, Transform targetTransform, Action completedCallback = null){
         Vector3 startPos = cardTransform.position;
         Quaternion startRot = cardTransform.rotation;
+        Vector3 startScale = cardTransform.localScale;
 
         float yValue = DetermineCardPoolYMax(targetTransform.position.y);
         Vector3 targetPosition = (Vector3.right * targetTransform.position.x) + (Vector3.up * yValue) + (Vector3.forward * targetTransform.position.z);
@@ -305,11 +306,13 @@ public class GameTable : MonoBehaviour{
             float percent = (Time.time - startTime) / _cardPlayLerpTime;
             cardTransform.position = Vector3.Lerp(startPos, targetPosition, percent);
             cardTransform.rotation = Quaternion.Lerp(startRot, targetTransform.rotation, percent);
+            cardTransform.localScale = Vector3.Lerp(startScale, targetTransform.localScale, percent);
             yield return null;
         }
         
         cardTransform.position = targetPosition;
         cardTransform.rotation = targetTransform.rotation;
+        cardTransform.localScale = targetTransform.localScale;
         completedCallback?.Invoke();
     }
     /// <summary>
